@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1575130086 source:/home/ugo/cpp/curses/main.cpp
+	<iostream>
+	<ncurses.h>
+	<stdio.h>
+
