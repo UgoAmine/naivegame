@@ -2,6 +2,11 @@
 #include <ncurses.h>
 #include <stdio.h>
 
+
+//  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//  !!! JE SAIS PAS PQ CA MARCHE, Y AUCUN REFRESH ET POURTANT TOUT SE DEROULE SANS PB !!!
+//  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 using namespace std;
 
 int main(void)
