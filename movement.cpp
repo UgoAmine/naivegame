@@ -21,16 +21,17 @@ std::vector<int> random_data(int n , int a, int b) //random data generator funct
   return v;
 }
 
+
 int main(void)
 {
     initscr();              // Initialise la structure WINDOW et autres param
     cbreak();
     noecho();
-    halfdelay(10);
+    halfdelay(20);
 
-    int ch = 's';
+    int ch = 's'; //RANDOM INIT TO ENTER THE LOOP
     int dimFenetre = 60;
-    int nbMonstres = 20;
+    int nbMonstres = 30;
 
     //GENERATES BORDERS
     for(int i=0; i<dimFenetre;i++)
@@ -55,68 +56,95 @@ int main(void)
     //PRINTS PLAYER ON ITS INITIAL RANDOM POSITION
     mvaddch(posJ[0],posJ[1], 'J');
 
-    while(ch!='o')
+    while(ch!='o') //RANDOM CONDITION TO STAY IN THE LOOP
     {
         ch=getch();
 
         //CREATES A RANDOM VECTOR TO DETERMINE HOW MONSTERS MOVE EACH STEP
         // 0 = UP, 1 = RIGHT, 2 = DOWN, 3 = LEFT
-        std::vector<int> movM = random_data(nbMonstres,0,3);
+        std::vector<int> stepM = random_data(nbMonstres,0,3);
 
-        //UPDATES posM ACCORDING TO movM
+        //MOVES MONSTERS ACCORDING TO stepM
         for(int i=0; i<nbMonstres;i++)
-            switch(movM[i])
+            switch(stepM[i])
             {
                 case 0:
-                    mvaddch(posM[i][0],posM[i][1], ' ');
-                    posM[i][0]--;
-                    mvaddch(posM[i][0],posM[i][1], 's');
+                    if(mvinch(posM[i][0]-1,posM[i][1])==' ')
+                    {
+                        mvaddch(posM[i][0],posM[i][1], ' ');
+                        posM[i][0]--;
+                        mvaddch(posM[i][0],posM[i][1], 's');
+                    }
                     break;
                 case 1:
-                    mvaddch(posM[i][0],posM[i][1], ' ');
-                    posM[i][1]++;
-                    mvaddch(posM[i][0],posM[i][1], 's');
+                    if(mvinch(posM[i][0],posM[i][1]+1)==' ')
+                    {
+                        mvaddch(posM[i][0],posM[i][1], ' ');
+                        posM[i][1]++;
+                        mvaddch(posM[i][0],posM[i][1], 's');
+                    }
                     break;
                 case 2:
-                    mvaddch(posM[i][0],posM[i][1], ' ');
-                    posM[i][0]++;
-                    mvaddch(posM[i][0],posM[i][1], 's');
+                    if(mvinch(posM[i][0]+1,posM[i][1])==' ')
+                    {
+                        mvaddch(posM[i][0],posM[i][1], ' ');
+                        posM[i][0]++;
+                        mvaddch(posM[i][0],posM[i][1], 's');
+                    }
                     break;
                 case 3:
-                    mvaddch(posM[i][0],posM[i][1], ' ');
-                    posM[i][1]--;
-                    mvaddch(posM[i][0],posM[i][1], 's');
+                    if(mvinch(posM[i][0],posM[i][1]-1)==' ')
+                    {
+                        mvaddch(posM[i][0],posM[i][1], ' ');
+                        posM[i][1]--;
+                        mvaddch(posM[i][0],posM[i][1], 's');
+                    }
                     break;
             }
 
-        //ALLOWS THE PLAYER TO MOVE BUT ERASES EVERYTHING IN ITS PATH
+        //MOVES PLAYER ACCORDING TO KEYBOARD INPUT, CHECKS CONFLICTS
         switch(ch)
         {
             case 'z':
-                mvaddch(posJ[0],posJ[1], ' ');
-                posJ[0]--;
-                mvaddch(posJ[0],posJ[1], 'J');
+                if(mvinch(posJ[0]-1,posJ[1])==' ')
+                {
+                    mvaddch(posJ[0],posJ[1], ' ');
+                    posJ[0]--;
+                    mvaddch(posJ[0],posJ[1], 'J');
+                }
                 break;
             case 'd':
-                mvaddch(posJ[0],posJ[1], ' ');
-                posJ[1]++;
-                mvaddch(posJ[0],posJ[1], 'J');
+                if(mvinch(posJ[0],posJ[1]+1)==' ')
+                {
+                    mvaddch(posJ[0],posJ[1], ' ');
+                    posJ[1]++;
+                    mvaddch(posJ[0],posJ[1], 'J');
+                }
                 break;
             case 'q':
-                mvaddch(posJ[0],posJ[1], ' ');
-                posJ[1]--;
-                mvaddch(posJ[0],posJ[1], 'J');
+                if(mvinch(posJ[0],posJ[1]-1)==' ')
+                {
+                    mvaddch(posJ[0],posJ[1], ' ');
+                    posJ[1]--;
+                    mvaddch(posJ[0],posJ[1], 'J');
+                }
                 break;
             case 's':
-                mvaddch(posJ[0],posJ[1], ' ');
-                posJ[0]++;
-                mvaddch(posJ[0],posJ[1], 'J');
+                if(mvinch(posJ[0]+1,posJ[1])==' ')
+                {
+                    mvaddch(posJ[0],posJ[1], ' ');
+                    posJ[0]++;
+                    mvaddch(posJ[0],posJ[1], 'J');
+                }
                 break;
         }
+
 
         move(posJ[0],posJ[1]);
     }
 
+
+    getch();
     endwin();               // Restaure les paramètres par défaut du terminal
 
     return 0;
