@@ -24,34 +24,92 @@ std::vector<int> random_data(int n , int a, int b) //random data generator funct
 
 int main(void)
 {
-    initscr();              // Initialise la structure WINDOW et autres param
+    initscr();
     cbreak();
     noecho();
-    halfdelay(20);
+    halfdelay(10);
 
-    int ch = 's'; //RANDOM INIT TO ENTER THE LOOP
-    int dimFenetre = 60;
-    int nbMonstres = 30;
+    int ch = 'I'; //RANDOM INIT TO ENTER THE LOOP
+    int height = 60;
+    int width = 120;
+    int nbMonstres = 20;
+    int nbMurs = 200;
+
+    //GENERATES WALLS OF RANDOM SIZE AND TYPE
+    for(int j=0; j<nbMurs; j++)
+    {
+        int i=0;
+        //GENERATES A WALL SIZE BETWEEN 5 AND 15
+        int wallSize = random_data(1,5,15)[0];
+        //GENERATES RANDOM STARTING POS FOR WALLS
+        std::vector<int> posW = {random_data(1, 2, height-3)[0], random_data(1, 2, width-3)[0]};
+
+
+        switch(random_data(1,0,3)[0])
+        {
+        case 0: //RIGHT HORIZONTAL
+            while ((i < wallSize)&(posW[1]+i < width-2))
+            {
+                mvaddch(posW[0]-1,posW[1]+i, ' ');
+                mvaddch(posW[0]+1,posW[1]+i, ' ');
+                mvaddch(posW[0],posW[1]+i, 'W');
+                i++;
+            }
+            break;
+        case 1: //DOWN VERTICAL
+            while ((i < wallSize)&(posW[0]+i < height-2))
+            {
+                mvaddch(posW[0]+i,posW[1]+1, ' ');
+                mvaddch(posW[0]+i,posW[1]-1, ' ');
+                mvaddch(posW[0]+i,posW[1], 'W');
+                i++;
+            }
+            break;
+        case 2: //DOWN-RIGHT DIAGONAL
+            while ((i < wallSize)&(posW[1]+i+1 < width-1)&(posW[0]+i+1 < height-2))
+            {
+                mvaddch(posW[0]+i, posW[1]+i, 'W');
+                mvaddch(posW[0]+i-1, posW[1]+i, ' ');
+                mvaddch(posW[0]+i, posW[1]+i+1, ' ');
+                mvaddch(posW[0]+i, posW[1]+i-1, ' ');
+                mvaddch(posW[0]+i+1, posW[1]+i, ' ');
+                i++;
+            }
+            break;
+        case 3: //UP-RIGHT DIAGONAL
+            while ((i < wallSize)&(posW[0]-i-1 > 0)&(posW[1]+i+1 < width-2))
+            {
+                mvaddch(posW[0]-i, posW[1]+i, 'W');
+                mvaddch(posW[0]+i-1, posW[1]+i, ' ');
+                mvaddch(posW[0]+i, posW[1]+i+1, ' ');
+                mvaddch(posW[0]+i, posW[1]+i-1, ' ');
+                mvaddch(posW[0]+i+1, posW[1]+i, ' ');
+                i++;
+            }
+            break;
+        }
+    }
 
     //GENERATES BORDERS
-    for(int i=0; i<dimFenetre;i++)
-        for(int j=0; j<dimFenetre; j++)
-            ((i==0)||(i==dimFenetre-1)||(j==0)||(j==dimFenetre-1)) ? mvaddch(i,j, 'X') : mvaddch(i,j, ' ');
+    for(int i=0; i<height;i++)
+        for(int j=0; j<width; j++)
+            if((i==0)||(i==height-1)||(j==0)||(j==width-1)) mvaddch(i,j, 'X');
 
-    //CREATES A VECTOR OF RANDOM STARTING POS FOR MONSTERS
+
+    //GENERATES RANDOM STARTING COORDINATES FOR MONSTERS
     //INITIALLY RANDOM, THEN UPDATED ACCORDING TO MONSTERS MOVEMENT
     //THERE MAY BE OVERLAPPING
     std::vector<std::vector<int>> posM;
-    for(int i=0;i<nbMonstres;i++)
-        posM.push_back(random_data(2,1,dimFenetre-2));
+    for(int i=0; i<nbMonstres; i++)
+        posM.push_back({random_data(1,1,height-2)[0],random_data(1,1,width-2)[0]});
 
     //PRINTS MONSTERS ON THEIR INITIAL STARTING POSITIONS
     for(int i=0; i<nbMonstres; i++)
-            mvaddch(posM[i][0], posM[i][1], 'S');
+            mvaddch(posM[i][0], posM[i][1], 's');
 
     //CREATES A VECTOR OF RANDOM STARTING POS FOR PLAYER
     //INITIALLY RANDOM, THEN UPDATED ACCORDING TO PLAYER MOVEMENT
-    std::vector<int> posJ = random_data(2,1,dimFenetre-2);
+    std::vector<int> posJ = {random_data(1,1,height-2)[0],random_data(1,1,width-2)[0]};
 
     //PRINTS PLAYER ON ITS INITIAL RANDOM POSITION
     mvaddch(posJ[0],posJ[1], 'J');
@@ -63,6 +121,43 @@ int main(void)
         //CREATES A RANDOM VECTOR TO DETERMINE HOW MONSTERS MOVE EACH STEP
         // 0 = UP, 1 = RIGHT, 2 = DOWN, 3 = LEFT
         std::vector<int> stepM = random_data(nbMonstres,0,3);
+
+        //MOVES PLAYER ACCORDING TO KEYBOARD INPUT, CHECKS CONFLICTS
+        switch(ch)
+        {
+            case 'z':
+                if(mvinch(posJ[0]-1,posJ[1])==' ')
+                {
+                    mvaddch(posJ[0],posJ[1], ' ');
+                    posJ[0]--;
+                    mvaddch(posJ[0],posJ[1], 'J');
+                }
+                break;
+            case 'd':
+                if(mvinch(posJ[0],posJ[1]+1)==' ')
+                {
+                    mvaddch(posJ[0],posJ[1], ' ');
+                    posJ[1]++;
+                    mvaddch(posJ[0],posJ[1], 'J');
+                }
+                break;
+            case 'q':
+                if(mvinch(posJ[0],posJ[1]-1)==' ')
+                {
+                    mvaddch(posJ[0],posJ[1], ' ');
+                    posJ[1]--;
+                    mvaddch(posJ[0],posJ[1], 'J');
+                }
+                break;
+            case 's':
+                if(mvinch(posJ[0]+1,posJ[1])==' ')
+                {
+                    mvaddch(posJ[0],posJ[1], ' ');
+                    posJ[0]++;
+                    mvaddch(posJ[0],posJ[1], 'J');
+                }
+                break;
+        }
 
         //MOVES MONSTERS ACCORDING TO stepM
         for(int i=0; i<nbMonstres;i++)
@@ -102,49 +197,9 @@ int main(void)
                     break;
             }
 
-        //MOVES PLAYER ACCORDING TO KEYBOARD INPUT, CHECKS CONFLICTS
-        switch(ch)
-        {
-            case 'z':
-                if(mvinch(posJ[0]-1,posJ[1])==' ')
-                {
-                    mvaddch(posJ[0],posJ[1], ' ');
-                    posJ[0]--;
-                    mvaddch(posJ[0],posJ[1], 'J');
-                }
-                break;
-            case 'd':
-                if(mvinch(posJ[0],posJ[1]+1)==' ')
-                {
-                    mvaddch(posJ[0],posJ[1], ' ');
-                    posJ[1]++;
-                    mvaddch(posJ[0],posJ[1], 'J');
-                }
-                break;
-            case 'q':
-                if(mvinch(posJ[0],posJ[1]-1)==' ')
-                {
-                    mvaddch(posJ[0],posJ[1], ' ');
-                    posJ[1]--;
-                    mvaddch(posJ[0],posJ[1], 'J');
-                }
-                break;
-            case 's':
-                if(mvinch(posJ[0]+1,posJ[1])==' ')
-                {
-                    mvaddch(posJ[0],posJ[1], ' ');
-                    posJ[0]++;
-                    mvaddch(posJ[0],posJ[1], 'J');
-                }
-                break;
-        }
-
-
         move(posJ[0],posJ[1]);
     }
 
-
-    getch();
     endwin();               // Restaure les paramètres par défaut du terminal
 
     return 0;
