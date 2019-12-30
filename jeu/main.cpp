@@ -12,14 +12,17 @@ int main(int argc, char *argv[])
 
   char c;
 
-  WINDOW * win = newwin(50, 100 , 0 , 0);
-  Board brd(66,win);
+  WINDOW* win = newwin(70, 130, 0, 0);
+  /* Bien que la map soit de largeur 100, on rajoute quelques colonnes/lignes
+     pour s'autoriser à écrire des choses quant à l'état du jeu.
+  */
+  Board brd(win);
   Player jr(win);
   Monstre mst (win);
 
-  while (jr.getpos() != mst.getpos())
+  while (mvwinch(win, 0, 0) == 'X')
   {
-    c=wgetch(win);
+    c = wgetch(win);
     mst.move(win);
     jr.move(c, win);
   }
