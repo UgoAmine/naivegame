@@ -6,10 +6,9 @@
 class Player
 {
   public:
-    Player(WINDOW* );
+    Player(WINDOW*);
     virtual ~Player();
 
-    void move(char , WINDOW* );
     inline std::vector<int> getpos() const {return posJ;}
     inline int getposy() const {return posJ[0];}
     inline int getposx() const {return posJ[1];}
@@ -18,9 +17,12 @@ class Player
     void setposy(const int);
     void setposx(const int);
 
-    void doorOpening();
-    void telepIncrem();
+    void action(WINDOW*, char);
+    /*Cette méthode peut effectuer deux actions différentes en fonction de ce
+      que ramasse le joueur, chargeur ou diamant*/
 
+
+    void move(char, WINDOW*);
     void moveNorth(WINDOW*);
     void moveEast(WINDOW*);
     void moveSouth(WINDOW*);
@@ -28,6 +30,7 @@ class Player
 
   private:
     std::vector<int> posJ;
+    int numberOfTeleport;
 };
 
 #endif // JOUEUR_H
