@@ -4,13 +4,11 @@
 #define print(x) std::cout<< x
 
 
-
 std::vector<int> random_data(int n , int a, int b) //random data generator function(number of data, lower bound, upperbound )
 {
   std::random_device r;
   std::seed_seq      seed{r(), r(), r(), r(), r(), r(), r(), r()};
   std::mt19937       eng(seed); // a source of random data
-
   std::uniform_int_distribution<int> dist(a,b);
   std::vector<int> v(n);
 
@@ -18,186 +16,186 @@ std::vector<int> random_data(int n , int a, int b) //random data generator funct
   return v;
 }
 
-Board::Board(int nbwall, WINDOW* win) : nbTelep(0), nbCharg(0)
+Board::Board(WINDOW* win)
 {
-  int height{50}, width{100}, maxwallsize{33}, nbdoor{10}, nbdiams{10}, nbchargeur{10};
+  int height{50}, width{100}, maxWallSize{33}, numberOfWalls{66};
+  int numberOfDoors{10}, numberOfCharg{10}, numberOfDiam{20};
 
-  /* Ici, nous faisons le choix de créer d'abord les murs, puis les frontières.
-     En effet, leur implémentation effacerait des frontières si celles-ci étaient
-     déjà présentes.
-     Il semble redondant de coder HORIZONTAL LEFT et HORIZONTAL RIGHT, mais en
-     codant seulement 4 types de murs (pour les 4 orientations), nous n'obtenions
-     pas un répartition symétrique des murs. La répartition n'est cependant pas
-     uniforme. */
+  wallGen(win, height, width, maxWallSize, numberOfWalls);
+  borderGen(win, height, width);
+  doorGen(win, height, width, numberOfDoors);
+  chargGen(win, height, width, numberOfCharg);
+  diamGen(win, height, width, numberOfDiam);
 
-  // WALLS GENERATION
-  for (int j = 0; j < nbwall; j++)
+  wrefresh(win);
+
+}
+
+Board::~Board(){}
+
+void Board::effacer(WINDOW* fenetre, int y, int x)
+{
+  mvwaddch(fenetre, y-1, x-1, ' ');
+  mvwaddch(fenetre, y-1,   x, ' ');
+  mvwaddch(fenetre, y-1, x+1, ' ');
+  mvwaddch(fenetre, y,   x-1, ' ');
+  mvwaddch(fenetre, y,     x, ' ');
+  mvwaddch(fenetre, y,   x+1, ' ');
+  mvwaddch(fenetre, y+1, x-1, ' ');
+  mvwaddch(fenetre, y+1,   x, ' ');
+  mvwaddch(fenetre, y+1, x+1, ' ');
+}
+
+void Board::wallGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDeMurs, int tailleMurMax)
+{
+  for (int j = 0; j < nombreDeMurs; j++)
   {
     //  SETTING RANDOM WALL SIZE
-    int wallsize{random_data(1,5,maxwallsize)[0]};
+    int wallsize{random_data(1,5,tailleMurMax)[0]};
 
     //  SETTING RANDOM STARTING POSITION FOR THE WALL
-    std::vector<int> rndpos = random_data(1,2,height-3);
-    rndpos.push_back(random_data(1,2,width-3)[0]);
+    std::vector<int> rndpos = random_data(1,2,hauteur-3);
+    rndpos.push_back(random_data(1,2,largeur-3)[0]);
 
     int i=0;
+    int k=0;
     //  CHOOSING A RANDOM TYPE OF WALL
     switch (random_data(1,1,8)[0])
     {
       case 1: //HORIZONTAL RIGHT
       {
-        mvwaddch(win, rndpos[0]-1, rndpos[1]-1, ' ');
-        mvwaddch(win, rndpos[0],   rndpos[1]-1, ' ');
-        mvwaddch(win, rndpos[0]+1, rndpos[1]-1, ' ');
-        while ((i < wallsize) & (rndpos[1]+i < width - 1))
+        while ((i < wallsize) & (rndpos[1]+i < largeur-1))
         {
-          mvwaddch(win, rndpos[0]  , rndpos[1]+i, 'X');
-          mvwaddch(win, rndpos[0]+1, rndpos[1]+i, ' ');
-          mvwaddch(win, rndpos[0]-1, rndpos[1]+i, ' ');
+          effacer(fenetre, rndpos[0], rndpos[1]+i);
           i++;
         }
-        mvwaddch(win, rndpos[0]-1, rndpos[1]+i+1, ' ');
-        mvwaddch(win, rndpos[0],   rndpos[1]+i+1, ' ');
-        mvwaddch(win, rndpos[0]+1, rndpos[1]+i+1, ' ');
+        while ((k < wallsize) & (rndpos[1]+k < largeur-1))
+        {
+          mvwaddch(fenetre, rndpos[0], rndpos[1]+k,'X');
+          k++;
+        }
         break;
       }
 
       case 2: //HORIZONTAL LEFT
       {
-        mvwaddch(win, rndpos[0]-1, rndpos[1]+1, ' ');
-        mvwaddch(win, rndpos[0],   rndpos[1]+1, ' ');
-        mvwaddch(win, rndpos[0]+1, rndpos[1]+1, ' ');
         while ((i < wallsize) & (rndpos[1]-i > 0))
         {
-          mvwaddch(win, rndpos[0]  , rndpos[1]-i, 'X');
-          mvwaddch(win, rndpos[0]+1, rndpos[1]-i, ' ');
-          mvwaddch(win, rndpos[0]-1, rndpos[1]-i, ' ');
+          effacer(fenetre, rndpos[0], rndpos[1]-i);
           i++;
         }
-        mvwaddch(win, rndpos[0]-1, rndpos[1]-i-1, ' ');
-        mvwaddch(win, rndpos[0],   rndpos[1]-i-1, ' ');
-        mvwaddch(win, rndpos[0]+1, rndpos[1]-i-1, ' ');
+        while ((k < wallsize) & (rndpos[1]-k > 0))
+        {
+          mvwaddch(fenetre, rndpos[0], rndpos[1]-k,'X');
+          k++;
+        }
         break;
       }
 
       case 3: // DOWN VERTICAL
       {
-        mvwaddch(win, rndpos[0]-1, rndpos[1]-1, ' ');
-        mvwaddch(win, rndpos[0]-1,   rndpos[1], ' ');
-        mvwaddch(win, rndpos[0]-1, rndpos[1]+1, ' ');
-        while ((i < wallsize) & (rndpos[0]+i < height-1))
+        while ((i < wallsize) & (rndpos[0]+i < hauteur-1))
         {
-          mvwaddch(win, rndpos[0]+i, rndpos[1]  , 'X');
-          mvwaddch(win, rndpos[0]+i, rndpos[1]+1, ' ');
-          mvwaddch(win, rndpos[0]+i, rndpos[1]-1, ' ');
+          effacer(fenetre, rndpos[0]+i, rndpos[1]);
           i++;
         }
-        mvwaddch(win, rndpos[0]+i+1, rndpos[1]-1, ' ');
-        mvwaddch(win, rndpos[0]+i+1,   rndpos[1], ' ');
-        mvwaddch(win, rndpos[0]+i+1, rndpos[1]+1, ' ');
+        while ((k < wallsize) & (rndpos[0]+k < hauteur-1))
+        {
+          mvwaddch(fenetre, rndpos[0]+k, rndpos[1],'X');
+          k++;
+        }
         break;
       }
 
       case 4: // UP VERTICAL
       {
-        mvwaddch(win, rndpos[0]+1, rndpos[1]-1, ' ');
-        mvwaddch(win, rndpos[0]+1,   rndpos[1], ' ');
-        mvwaddch(win, rndpos[0]+1, rndpos[1]+1, ' ');
         while ((i < wallsize) & (rndpos[0]-i > 0))
         {
-          mvwaddch(win, rndpos[0]-i, rndpos[1]  , 'X');
-          mvwaddch(win, rndpos[0]-i, rndpos[1]+1, ' ');
-          mvwaddch(win, rndpos[0]-i, rndpos[1]-1, ' ');
+          effacer(fenetre, rndpos[0]-i, rndpos[1]);
           i++;
         }
-        mvwaddch(win, rndpos[0]-i-1, rndpos[1]-1, ' ');
-        mvwaddch(win, rndpos[0]-i-1,   rndpos[1], ' ');
-        mvwaddch(win, rndpos[0]-i-1, rndpos[1]+1, ' ');
+        while ((k < wallsize) & (rndpos[0]-k > 0))
+        {
+          mvwaddch(fenetre, rndpos[0]-k, rndpos[1],'X');
+          k++;
+        }
         break;
       }
 
       case 5: // DIAGONAL DOWN-RIGHT
       {
-        mvwaddch(win, rndpos[0]-1, rndpos[1]-1, ' ');
-        while ((i < wallsize) & (rndpos[0]+i < height-1) & (rndpos[1]+i < width-1))
+        while ((i < wallsize) & (rndpos[0]+i < hauteur-1) & (rndpos[1]+i < largeur-1))
         {
-          mvwaddch(win, rndpos[0]+i  , rndpos[1]+i  , 'X');
-          mvwaddch(win, rndpos[0]+i  , rndpos[1]+i-1, ' ');
-          mvwaddch(win, rndpos[0]+i-1, rndpos[1]+i  , ' ');
-          mvwaddch(win, rndpos[0]+i+1, rndpos[1]+i-1, ' ');
-          mvwaddch(win, rndpos[0]+i-1, rndpos[1]+i+1, ' ');
+          effacer(fenetre, rndpos[0]+i  , rndpos[1]+i);
           i++;
         }
-        mvwaddch(win, rndpos[0]+i+1, rndpos[1]+i+1, ' ');
+        while ((k < wallsize) & (rndpos[0]+k < hauteur-1) & (rndpos[1]+k < largeur-1))
+        {
+          mvwaddch(fenetre, rndpos[0]+k, rndpos[1]+k,'X');
+          k++;
+        }
         break;
       }
 
       case 6: // DIAGONAL UP-RIGHT
       {
-        mvwaddch(win, rndpos[0]+1, rndpos[1]-1, ' ');
-        while ((i < wallsize) & (rndpos[0]-i > 0) & (rndpos[1]+i < width-1))
+        while ((i < wallsize) & (rndpos[0]-i > 0) & (rndpos[1]+i < largeur-1))
         {
-          mvwaddch(win, rndpos[0]-i  , rndpos[1]+i  , 'X');
-          mvwaddch(win, rndpos[0]-i-1, rndpos[1]+i  , ' ');
-          mvwaddch(win, rndpos[0]-i  , rndpos[1]+i+1, ' ');
-          mvwaddch(win, rndpos[0]-i-1, rndpos[1]+i-1, ' ');
-          mvwaddch(win, rndpos[0]-i+1, rndpos[1]+i+1, ' ');
+          effacer(fenetre, rndpos[0]-i, rndpos[1]+i);
           i++;
         }
-        mvwaddch(win, rndpos[0]-i-1, rndpos[1]+i+1, ' ');
+        while ((k < wallsize) & (rndpos[0]-k > 0) & (rndpos[1]+k < largeur-1))
+        {
+          mvwaddch(fenetre, rndpos[0]-k, rndpos[1]+k,'X');
+          k++;
+        }
         break;
       }
 
       case 7: // DIAGONAL UP-LEFT
       {
-        mvwaddch(win, rndpos[0]+1, rndpos[1]+1, ' ');
         while ((i < wallsize) & (rndpos[0]-i > 0) & (rndpos[1]-i > 0))
         {
-          mvwaddch(win, rndpos[0]-i  , rndpos[1]+i  , 'X');
-          mvwaddch(win, rndpos[0]-i-1, rndpos[1]+i  , ' ');
-          mvwaddch(win, rndpos[0]-i  , rndpos[1]+i+1, ' ');
-          mvwaddch(win, rndpos[0]-i-1, rndpos[1]+i-1, ' ');
-          mvwaddch(win, rndpos[0]-i+1, rndpos[1]+i+1, ' ');
+          effacer(fenetre, rndpos[0]-i, rndpos[1]-i);
           i++;
         }
-        mvwaddch(win, rndpos[0]-i-1, rndpos[1]-i-1, ' ');
+        while ((k < wallsize) & (rndpos[0]-k > 0) & (rndpos[1]-k > 0))
+        {
+          mvwaddch(fenetre, rndpos[0]-k, rndpos[1]-k,'X');
+          k++;
+        }
         break;
       }
 
       case 8: // DIAGONAL DOWN-LEFT
       {
-        mvwaddch(win, rndpos[0]-1, rndpos[1]+1, ' ');
-        while ((i < wallsize) & (rndpos[0]+i < height-1) & (rndpos[1]-i > 0))
+        while ((i < wallsize) & (rndpos[0]+i < hauteur-1) & (rndpos[1]-i > 0))
         {
-          mvwaddch(win, rndpos[0]-i  , rndpos[1]+i  , 'X');
-          mvwaddch(win, rndpos[0]-i-1, rndpos[1]+i  , ' ');
-          mvwaddch(win, rndpos[0]-i  , rndpos[1]+i+1, ' ');
-          mvwaddch(win, rndpos[0]-i-1, rndpos[1]+i-1, ' ');
-          mvwaddch(win, rndpos[0]-i+1, rndpos[1]+i+1, ' ');
+          effacer(fenetre, rndpos[0]+i  , rndpos[1]-i);
           i++;
         }
-        mvwaddch(win, rndpos[0]+i+1, rndpos[1]-i-1, ' ');
+        while ((k < wallsize) & (rndpos[0]+k < hauteur-1) & (rndpos[1]-k > 0))
+        {
+          mvwaddch(fenetre, rndpos[0]+k, rndpos[1]-k,'X');
+          k++;
+        }
         break;
       }
     }
   }
+}
 
-  // SETTING BORDER WALLS
-  for (int i = 0; i < height; i++)
-    for (int j = 0; j < width; j++)
-      if ((i==0) || (i==height-1) || (j==0) || (j== width - 1))
-        mvwaddch(win,i,j,'X');
+void Board::borderGen(WINDOW* fenetre, int hauteur, int largeur)
+{
+  for (int i = 0; i < hauteur; i++)
+    for (int j = 0; j < largeur; j++)
+      if ((i == 0) || (i == hauteur-1) || (j == 0) || (j == largeur-1))
+        mvwaddch(fenetre, i, j, 'X');
+}
 
-  /* Nous voulons d'abord choisir aléatoirement sur quel bord créer des portes.
-     Nous prenons en compte le fait que les frontières horizontales sont deux
-     fois plus longues que les verticales.
-     Une fois le bord choisis, nous tirons aléatoirement un mur qui sera
-     transformé en porte fermée (tant que cette porte n'est pas bloquée par un
-     mur classique)
-  */
-
-  // DOORS GENERATION
-  for(int i = 0; i < nbdoor; i++)
+void Board::doorGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDePortes)
+{
+  for(int i = 0; i < nombreDePortes; i++)
   {
     int choixFrontiere{random_data(1,1,6)[0]};
 
@@ -205,85 +203,82 @@ Board::Board(int nbwall, WINDOW* win) : nbTelep(0), nbCharg(0)
     {
       case 1: // LEFT BORDER
       {
-        int rndPosDoor{random_data(1, 1, 48)[0]};
-        while (mvwinch(win, rndPosDoor, 1)!= ' ')
-          rndPosDoor = random_data(1, 1, 48)[0];
-        mvwaddch(win, rndPosDoor, 0, '-');
+        int rndPosDoor{random_data(1, 1, hauteur-2)[0]};
+        while (mvwinch(fenetre, rndPosDoor, 1)!= ' ')
+          rndPosDoor = random_data(1, 1, hauteur-2)[0];
+        mvwaddch(fenetre, rndPosDoor, 0, '-');
       };
       break;
       case 2: // RIGHT BORDER
       {
-        int rndPosDoor{random_data(1, 1, 48)[0]};
-        while (mvwinch(win, rndPosDoor, 98)!= ' ')
-          rndPosDoor = random_data(1, 1, 48)[0];
-        mvwaddch(win, rndPosDoor, 99, '-');
+        int rndPosDoor{random_data(1, 1, hauteur-2)[0]};
+        while (mvwinch(fenetre, rndPosDoor, largeur-2)!= ' ')
+          rndPosDoor = random_data(1, 1, hauteur-2)[0];
+        mvwaddch(fenetre, rndPosDoor, largeur-1, '-');
       };
       break;
       case 3: // UPPER BORDER
       {
-        int rndPosDoor{random_data(1, 1, 98)[0]};
-        while (mvwinch(win, 1, rndPosDoor)!= ' ')
-          rndPosDoor = random_data(1, 1, 48)[0];
-        mvwaddch(win, 0, rndPosDoor, '-');
+        int rndPosDoor{random_data(1, 1, largeur-2)[0]};
+        while (mvwinch(fenetre, 1, rndPosDoor)!= ' ')
+          rndPosDoor = random_data(1, 1, hauteur-2)[0];
+        mvwaddch(fenetre, 0, rndPosDoor, '-');
       };
       break;
-      case 4: // UPPER BORDER TOO, same code
+      case 4: // UPPER BORDER TOO, same code as case 3.
       {
-        int rndPosDoor{random_data(1, 1, 98)[0]};
-        while (mvwinch(win, 1, rndPosDoor)!= ' ')
-          rndPosDoor = random_data(1, 1, 48)[0];
-        mvwaddch(win, 0, rndPosDoor, '-');
+        int rndPosDoor{random_data(1, 1, largeur-2)[0]};
+        while (mvwinch(fenetre, 1, rndPosDoor)!= ' ')
+          rndPosDoor = random_data(1, 1, hauteur-2)[0];
+        mvwaddch(fenetre, 0, rndPosDoor, '-');
       };
       break;
       case 5: // BOTTOM BORDER
       {
-        int rndPosDoor{random_data(1, 1, 98)[0]};
-        while (mvwinch(win, 48, rndPosDoor)!= ' ')
-          rndPosDoor = random_data(1, 1, 48)[0];
-        mvwaddch(win, 49, rndPosDoor, '-');
+        int rndPosDoor{random_data(1, 1, largeur-2)[0]};
+        while (mvwinch(fenetre, hauteur-2, rndPosDoor)!= ' ')
+          rndPosDoor = random_data(1, 1, hauteur-2)[0];
+        mvwaddch(fenetre, hauteur-1, rndPosDoor, '-');
       };
       break;
-      case 6: // BOTTOM BORDER TOO, same code
+      case 6: // BOTTOM BORDER TOO, same code as case 5.
       {
-        int rndPosDoor{random_data(1, 1, 98)[0]};
-        while (mvwinch(win, 48, rndPosDoor)!= ' ')
-          rndPosDoor = random_data(1, 1, 48)[0];
-        mvwaddch(win, 49, rndPosDoor, '-');
+        int rndPosDoor{random_data(1, 1, largeur-2)[0]};
+        while (mvwinch(fenetre, hauteur-2, rndPosDoor)!= ' ')
+          rndPosDoor = random_data(1, 1, hauteur-2)[0];
+        mvwaddch(fenetre, hauteur-1, rndPosDoor, '-');
       };
       break;
     }
   }
-
-  // DIAMS GENERATION
-  for(int j = 0; j < nbdiams; j++)
-  {
-    std::vector<int> rndposdiams{random_data(1, 1, 48)[0]};
-    rndposdiams.push_back(random_data(1, 1, 98)[0]);
-    while(mvwinch(win, rndposdiams[0], rndposdiams[1])!= ' ')
-    {
-      rndposdiams[0] = random_data(1, 1, 48)[0];
-      rndposdiams[1] = random_data(1, 1, 98)[0];
-    }
-    mvwaddch(win, rndposdiams[0], rndposdiams[1], '$');
-  }
-
-  // CHARG GENERATION
-  for (int k = 0; k < nbchargeur; k++)
-  {
-    std::vector<int> rndposdiams{random_data(1, 1, 48)[0]};
-    rndposdiams.push_back(random_data(1, 1, 98)[0]);
-    while(mvwinch(win, rndposdiams[0], rndposdiams[1])!= ' ')
-    {
-      rndposdiams[0] = random_data(1, 1, 48)[0];
-      rndposdiams[1] = random_data(1, 1, 98)[0];
-    }
-    mvwaddch(win, rndposdiams[0], rndposdiams[1], '*');
-  }
-
-  wrefresh(win);
-
-  mvwaddch(win, 10, 10, '+'); //POUR TESTER SORTIE DE BOUCLE DU MAIN
-
 }
 
-Board::~Board(){}
+void Board::chargGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDeChargeurs)
+{
+  for (int i = 0; i < nombreDeChargeurs; i++)
+  {
+    std::vector<int> rndposdiams{random_data(1, 1, hauteur-2)[0]};
+    rndposdiams.push_back(random_data(1, 1, largeur-2)[0]);
+    while(mvwinch(fenetre, rndposdiams[0], rndposdiams[1])!= ' ')
+    {
+      rndposdiams[0] = random_data(1, 1, hauteur-2)[0];
+      rndposdiams[1] = random_data(1, 1, largeur-2)[0];
+    }
+    mvwaddch(fenetre, rndposdiams[0], rndposdiams[1], '*');
+  }
+}
+
+void Board::diamGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDeDiamants)
+{
+  for(int j = 0; j < nombreDeDiamants; j++)
+  {
+    std::vector<int> rndposdiams{random_data(1, 1, hauteur-2)[0]};
+    rndposdiams.push_back(random_data(1, 1, largeur-2)[0]);
+    while(mvwinch(fenetre, rndposdiams[0], rndposdiams[1])!= ' ')
+    {
+      rndposdiams[0] = random_data(1, 1, hauteur-2)[0];
+      rndposdiams[1] = random_data(1, 1, largeur-2)[0];
+    }
+    mvwaddch(fenetre, rndposdiams[0], rndposdiams[1], '$');
+  }
+}
