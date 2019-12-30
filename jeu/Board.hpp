@@ -15,12 +15,20 @@ class Board
 {
 private:
     int size;
-    int nbTelep;
-    int nbCharg;
 
 public:
-  Board(int, WINDOW*);
+  Board(WINDOW*);
   ~Board();
+
+  void wallGen(WINDOW*, int, int, int, int);
+  void borderGen(WINDOW*, int, int);
+  void doorGen(WINDOW*, int, int, int);
+  void chargGen(WINDOW*, int, int, int);
+  void diamGen(WINDOW*, int, int, int);
+
+  void effacer(WINDOW*, int, int);
+
+
 
 };
 
