@@ -207,6 +207,7 @@ void Board::doorGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDePorte
         while (mvwinch(fenetre, rndPosDoor, 1)!= ' ')
           rndPosDoor = random_data(1, 1, hauteur-2)[0];
         mvwaddch(fenetre, rndPosDoor, 0, '-');
+        DoorList.push_back([rndPosDoor, 0]);
       };
       break;
       case 2: // RIGHT BORDER
@@ -215,6 +216,7 @@ void Board::doorGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDePorte
         while (mvwinch(fenetre, rndPosDoor, largeur-2)!= ' ')
           rndPosDoor = random_data(1, 1, hauteur-2)[0];
         mvwaddch(fenetre, rndPosDoor, largeur-1, '-');
+        DoorList.push_back([rndPosDoor, largeur-1]);
       };
       break;
       case 3: // UPPER BORDER
@@ -223,6 +225,7 @@ void Board::doorGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDePorte
         while (mvwinch(fenetre, 1, rndPosDoor)!= ' ')
           rndPosDoor = random_data(1, 1, hauteur-2)[0];
         mvwaddch(fenetre, 0, rndPosDoor, '-');
+        DoorList.push_back([0, rndPosDoor]);
       };
       break;
       case 4: // UPPER BORDER TOO, same code as case 3.
@@ -231,6 +234,7 @@ void Board::doorGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDePorte
         while (mvwinch(fenetre, 1, rndPosDoor)!= ' ')
           rndPosDoor = random_data(1, 1, hauteur-2)[0];
         mvwaddch(fenetre, 0, rndPosDoor, '-');
+        DoorList.push_back([0, rndPosDoor]);
       };
       break;
       case 5: // BOTTOM BORDER
@@ -239,6 +243,7 @@ void Board::doorGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDePorte
         while (mvwinch(fenetre, hauteur-2, rndPosDoor)!= ' ')
           rndPosDoor = random_data(1, 1, hauteur-2)[0];
         mvwaddch(fenetre, hauteur-1, rndPosDoor, '-');
+        DoorList.push_back([hauteur-1, rndPosDoor]);
       };
       break;
       case 6: // BOTTOM BORDER TOO, same code as case 5.
@@ -247,6 +252,7 @@ void Board::doorGen(WINDOW* fenetre, int hauteur, int largeur, int nombreDePorte
         while (mvwinch(fenetre, hauteur-2, rndPosDoor)!= ' ')
           rndPosDoor = random_data(1, 1, hauteur-2)[0];
         mvwaddch(fenetre, hauteur-1, rndPosDoor, '-');
+        DoorList.push_back(hauteur-1, rndPosDoor]);
       };
       break;
     }
